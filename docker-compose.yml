@@ -39,10 +39,7 @@ services:
       - db
       - redis
 
-volumes:
-  pgdata: {}
-  media: {}
-
+  # Corrected position for the scheduler service
   scheduler:
     build: .
     command: python -m scheduler.scheduler
@@ -52,3 +49,7 @@ volumes:
     depends_on:
       - db
       - redis
+
+volumes:
+  pgdata: {}
+  media: {}
