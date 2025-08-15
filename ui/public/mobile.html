@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Approvals</title>
+<style>
+  body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:#0b1020; color:#e5e7eb; margin:0; }
+  header { position:sticky; top:0; background:#0e1427; padding:12px 16px; border-bottom:1px solid #1f2937; display:flex; gap:8px; align-items:center; }
+  h1 { font-size:18px; margin:0; }
+  .grid { display:grid; grid-template-columns:1fr; gap:12px; padding:12px; }
+  .card { background:#0f172a; border:1px solid #1f2937; border-radius:14px; padding:12px; }
+  .thumb { width:100%; border-radius:10px; border:1px solid #202536; object-fit:cover; max-height:60vh; }
+  .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .btn { background:#111827; border:1px solid #25304a; color:#e5e7eb; padding:10px 14px; border-radius:10px; font-weight:600; }
+  .btn:active { transform: scale(0.98); }
+  .pill { padding:6px 10px; background:#0b1329; border:1px solid #1f2a4a; border-radius:999px; }
+  input, select { background:#0b1329; color:#e5e7eb; border:1px solid #1f2a4a; border-radius:10px; padding:10px; width:100%; }
+  .variants { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .variant img { width:100%; height:200px; object-fit:cover; border-radius:10px; border:1px solid #1f2a4a; }
+  .variant input { margin-top:6px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Approve titles & thumbnails</h1>
+  <button class="btn" onclick="load()">Refresh</button>
+</header>
+<div id="list" class="grid"></div>
+
+<script>
+const API = (localStorage.API_URL) || (new URL(window.location.href).searchParams.get('api')) || (window.location.origin.replace(':5173',':8000'));
+const MAGIC = (localStorage.MAGIC_TOKEN) || (new URL(window.location.href).searchParams.get('token')) || '';
+async function api(path, opts={}){
+  const res = await fetch(API+path, { ...opts, headers: { 'x-api-key': (localStorage.API_KEY||''), 'x-magic-token': MAGIC, 'Content-Type':'application/json', ...(opts.headers||{}) } });
+  if(!res.ok) throw new Error('HTTP '+res.status); return await res.json();
+}
+async function load(){
+  const r = await api('/approvals/pending?limit=10');
+  const list = document.getElementById('list'); list.innerHTML = '';
+  r.items.forEach(it => {
+    const card = document.createElement('div'); card.className = 'card';
+    card.innerHTML = `
+      ${it.thumbnail_url ? '<img src="'+API+it.thumbnail_url+'" class="thumb" />' : ''}
+      <div style="margin-top:8px"></div>
+      <div class="row"><span class="pill">+${it.views_24h} / 24h</span><a class="btn" href="${API+ (it.storage_url||'')}" target="_blank">Open</a></div>
+      <div style="margin-top:8px"></div>
+      <label>Title</label>
+      <input id="t_${it.clip_id}" value="${(it.current_title||'').replace(/"/g,'&quot;')}" placeholder="Enter a punchy title" />
+      <div class="row" style="gap:6px; overflow:auto; white-space:nowrap; margin-top:6px">
+        ${(it.suggestions||[]).map(s => '<button class="pill" onclick="document.getElementById(\'t_'+it.clip_id+'\').value=this.textContent">'+s.replace(/</g,'&lt;')+'</button>').join('')}
+      </div>
+      <div style="margin-top:10px"></div>
+      <label>Thumbnail style</label>
+      <div class="variants">
+        ${(it.style_variants||[]).map(v => '<label class="variant"><img src="'+API+v.url+'" /><input type="radio" name="s_'+it.clip_id+'" value="'+v.key+'"> Use '+v.key+'</label>').join('') || '<div class="row">No variants yet. Use desktop UI to generate.</div>'}
+      </div>
+      <div style="margin-top:10px"></div>
+      <div class="row">
+        <select id="p_'+it.clip_id+'"><option value="unlisted">YouTube: Unlisted</option><option value="public">Public</option><option value="private">Private</option></select>
+        <button class="btn" onclick="approve('${it.clip_id}')">Approve</button>
+      </div>
+    `;
+    list.appendChild(card);
+  })
+}
+async function approve(clip_id){
+  const title = document.getElementById('t_'+clip_id).value;
+  const style = document.querySelector('input[name="s_'+clip_id+'"]:checked');
+  const privacy = document.getElementById('p_'+clip_id).value;
+  const body = { title, style_key: style? style.value : null, publish_youtube: true, privacyStatus: privacy };
+  try{ await api('/approvals/'+clip_id+'/approve', { method:'POST', body: JSON.stringify(body) }); alert('Approved & queued upload'); if (MAGIC) localStorage.MAGIC_TOKEN = MAGIC;
+load(); } catch(e){ alert('Failed: '+e) }
+}
+if (MAGIC) localStorage.MAGIC_TOKEN = MAGIC;
+load();
+</script>
+</body>
+</html>

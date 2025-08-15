@@ -1,0 +1,72 @@
+:root {
+  --bg: #0f1115;
+  --panel: #151924;
+  --text: #e6e8ee;
+  --muted: #9aa4b2;
+  --accent: #6aa4ff;
+  --accent-2: #7bdfa3;
+  --border: #202536;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.app {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  height: 100vh;
+}
+.sidebar {
+  border-right: 1px solid var(--border);
+  background: var(--panel);
+  padding: 16px;
+  overflow: auto;
+}
+.main {
+  padding: 24px;
+  overflow: auto;
+}
+.h1 { font-size: 20px; font-weight: 700; margin: 0 0 12px; }
+.label { color: var(--muted); font-size: 12px; }
+.input, .button {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #0e1220;
+  color: var(--text);
+  outline: none;
+}
+.input:focus { border-color: var(--accent); }
+.button {
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  border: none; color: #0b0e16; font-weight: 700; cursor: pointer;
+}
+.button:disabled { opacity: 0.6; cursor: not-allowed; }
+.card {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 12px;
+  background: #0e1220;
+}
+.list { display: grid; gap: 8px; margin-top: 12px; }
+.item {
+  display: flex; gap: 8px; align-items: center; justify-content: space-between;
+  padding: 8px 10px; border: 1px solid var(--border); border-radius: 12px; background: #0c101a;
+}
+.badge { font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); background: #0a0e17; }
+.badge:hover { border-color: var(--accent); color: var(--text); }
+.segments { display: grid; gap: 10px; }
+.segment {
+  padding: 10px; border: 1px solid var(--border); border-radius: 12px; background: #0c101a;
+}
+.controls { display: flex; gap: 8px; margin-top: 12px; }
+.flex { display: flex; gap: 8px; }
+.hr { height: 1px; background: var(--border); margin: 16px 0; }
+.small { color: var(--muted); font-size: 12px; }
+yt-embed, iframe { border: 0; border-radius: 12px; }
