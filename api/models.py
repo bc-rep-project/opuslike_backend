@@ -161,7 +161,7 @@ class MagicLink(Base):
     token = Column(Text, nullable=False, unique=True)
     purpose = Column(Text, nullable=False)  # "approvals"
     email = Column(Text, nullable=True)
-    metadata = Column(JSON, nullable=True)
+    meta = Column(JSON, nullable=True)
     expires_at = Column(DateTime, nullable=False)
     used = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.utcnow)
